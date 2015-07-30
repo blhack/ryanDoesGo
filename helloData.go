@@ -3,6 +3,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
@@ -19,11 +20,13 @@ func printPerson(who *person) {
 }
 
 func main() {
+	var people []*person
+
 	//not actually my password you tricksy hobbitses
-	con, err := sql.Open("mysql", "root:somepassword@/golang")
+	con, err := sql.Open("mysql", "root:thegame@/golang")
 	checkErr(err)
 
-	rows, err := con.Query("select name,age from test where name=?", "Ryan")
+	rows, err := con.Query("select name,age from test")
 	checkErr(err)
 
 	for rows.Next() {
@@ -32,8 +35,11 @@ func main() {
 		err = rows.Scan(&name,&age)
 		checkErr(err)
 		me := &person{Name:name,Age:age}
-		printPerson(me)
+		people = append(people, me)
 	}
+	peopleJson, err := json.Marshal(people)
+	checkErr(err)
+	fmt.Println(string(peopleJson))
 }
 
 func checkErr(err error) {
